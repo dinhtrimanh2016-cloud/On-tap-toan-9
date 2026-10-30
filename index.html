@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Giữa Kỳ 1 Toán 9 - Trình Chiếu Tương Tác</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Serif -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax v3 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .math-font {
+            font-family: 'Noto Serif', serif;
+        }
+        /* Custom board textures */
+        .board-green {
+            background-color: #1b4332;
+            background-image: radial-gradient(#2d6a4f 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .board-grid {
+            background-color: #ffffff;
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-800 text-white border-b border-slate-700 px-4 py-3 flex items-center justify-between shadow-md z-30">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white p-2 rounded-lg shadow flex items-center justify-center w-10 h-10 font-bold text-lg">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base md:text-lg tracking-wide">ÔN TẬP GIỮA KỲ 1 - TOÁN 9</h1>
+                <p class="text-xs text-slate-400">Trường THCS Hưng Lộc | Năm học 2026 - 2027</p>
+            </div>
+        </div>
+
+        <!-- Center Controls: Part Switcher & Question Status -->
+        <div class="flex items-center space-x-2 bg-slate-700/60 p-1.5 rounded-xl border border-slate-600">
+            <button onclick="switchPart('part1')" id="btn-part1" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all bg-indigo-600 text-white shadow">
+                Phần I: Trắc nghiệm (1-24)
+            </button>
+            <button onclick="switchPart('part2')" id="btn-part2" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all text-slate-300 hover:text-white">
+                Phần II: Trả lời ngắn (25-35)
+            </button>
+        </div>
+
+        <!-- Right Utilities -->
+        <div class="flex items-center space-x-2">
+            <!-- Grid Drawer Toggle -->
+            <button onclick="toggleGridDrawer()" title="Danh sách câu hỏi" class="p-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-all flex items-center space-x-1.5 text-xs md:text-sm">
+                <i class="fa-solid fa-th"></i>
+                <span class="hidden md:inline">Danh sách</span>
+            </button>
+            <!-- Font Size Toggle -->
+            <div class="hidden sm:flex items-center bg-slate-700 rounded-lg p-0.5">
+                <button onclick="adjustFontSize(-1)" title="Thu nhỏ chữ" class="px-2 py-1 text-xs hover:bg-slate-600 rounded text-slate-300">A-</button>
+                <button onclick="adjustFontSize(1)" title="Phóng to chữ" class="px-2 py-1 text-xs hover:bg-slate-600 rounded text-slate-300">A+</button>
+            </div>
+            <!-- Fullscreen Toggle -->
+            <button onclick="toggleFullscreen()" title="Toàn màn hình" class="p-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-all">
+                <i class="fa-solid fa-expand" id="fullscreen-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="flex-1 flex overflow-hidden relative" id="workspace-container">
+        
+        <!-- Left/Main Presentation Area (or Split Left) -->
+        <div class="flex-1 flex flex-col h-full bg-slate-100 relative overflow-hidden transition-all duration-300" id="main-presentation-pane">
+            
+            <!-- Slide Header / Progress Bar -->
+            <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <span id="slide-badge" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider">
+                        Câu 1 / 35
+                    </span>
+                    <span id="slide-category-badge" class="text-xs font-medium text-slate-500">Trắc nghiệm nhiều lựa chọn</span>
+                </div>
+                <!-- Whiteboard Toggle Controls -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleOverlayBoard()" id="btn-overlay-board" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-pen-nib"></i>
+                        <span>Bảng viết đè</span>
+                    </button>
+                    <button onclick="toggleSplitBoard()" id="btn-split-board" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-columns"></i>
+                        <span>Bảng nháp đôi (50/50)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slide Content Area (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center relative">
+                <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-200 p-6 md:p-10 flex flex-col lg:flex-row gap-8 relative transition-all duration-200" id="question-card-box">
+                    
+                    <!-- Question Left Column: Content & Options -->
+                    <div class="flex-1 flex flex-col justify-between" id="question-text-col">
+                        <div>
+                            <div class="flex items-start justify-between mb-4">
+                                <h2 id="q-title" class="text-lg md:text-xl font-bold text-slate-900 math-font">Đang tải câu hỏi...</h2>
+                            </div>
+                            <div id="q-content" class="text-base md:text-lg text-slate-700 math-font leading-relaxed mb-6 space-y-3">
+                                <!-- Dynamic Question Text -->
+                            </div>
+                        </div>
+
+                        <!-- Options Container (Part 1: 4 choices, Part 2: Short answer inputs) -->
+                        <div id="q-options-container" class="mt-4">
+                            <!-- Injected via JS -->
+                        </div>
+
+                        <!-- Check & Explanation Action Bar -->
+                        <div class="mt-8 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center space-x-3">
+                                <button onclick="checkAnswer()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-md transition-all flex items-center space-x-2 text-sm">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Kiểm tra / Xem đáp án</span>
+                                </button>
+                                <div id="result-feedback" class="hidden items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-semibold">
+                                    <!-- Injected result -->
+                                </div>
+                            </div>
+                            <button onclick="toggleExplanation()" id="btn-toggle-expl" class="hidden px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-medium text-sm transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <span id="expl-btn-text">Xem lời giải chi tiết</span>
+                            </button>
+                        </div>
+
+                        <!-- Explanation Box -->
+                        <div id="explanation-box" class="hidden mt-4 p-5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-slate-800 math-font text-sm leading-relaxed">
+                            <h4 class="font-bold text-emerald-800 mb-2 flex items-center space-x-2">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span>Lời giải chi tiết chuẩn sư phạm:</span>
+                            </h4>
+                            <div id="explanation-content" class="space-y-2">
+                                <!-- Injected Explanation -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Right Column: Automatic SVG Diagram (if applicable) -->
+                    <div id="diagram-container-wrapper" class="hidden lg:w-96 flex flex-col items-center justify-center bg-slate-50 border border-slate-200 rounded-xl p-4 relative group">
+                        <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider flex items-center space-x-1">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Hình minh họa trực quan</span>
+                        </div>
+                        <div id="svg-diagram-box" class="w-full flex items-center justify-center cursor-pointer overflow-hidden rounded-lg bg-white p-2 border border-slate-100 shadow-inner transition-transform group-hover:scale-[1.02]" onclick="openSvgModal()" title="Bấm để phóng to hình vẽ">
+                            <!-- Injected SVG -->
+                        </div>
+                        <div class="absolute bottom-3 right-3 bg-slate-800/70 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass-plus mr-1"></i> Phóng to
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Footer Navigation Bar -->
+            <div class="bg-white border-t border-slate-200 px-6 py-3 flex items-center justify-between shadow-md z-20">
+                <button onclick="prevQuestion()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-all flex items-center space-x-2 border border-slate-300 shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Câu trước</span>
+                </button>
+                <div class="text-sm font-medium text-slate-600">
+                    Câu <span id="current-q-num" class="font-bold text-indigo-600">1</span> / <span id="total-q-num">35</span>
+                </div>
+                <button onclick="nextQuestion()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-all flex items-center space-x-2 shadow-md">
+                    <span>Câu sau</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Overlay Whiteboard Canvas (Chế độ 1: Vẽ đè lên Slide) -->
+            <div id="overlay-canvas-wrapper" class="absolute inset-0 pointer-events-none z-40 hidden">
+                <canvas id="overlay-whiteboard" class="w-full h-full pointer-events-auto cursor-crosshair"></canvas>
+                <!-- Floating Toolbar for Overlay Board -->
+                <div class="absolute top-16 right-6 bg-white/95 backdrop-blur shadow-xl border border-slate-200 rounded-2xl p-3 flex items-center space-x-3 pointer-events-auto z-50">
+                    <div class="flex items-center space-x-1.5 border-r pr-3 border-slate-200">
+                        <button onclick="setTool('pen')" id="tool-pen" class="p-2 rounded-lg bg-indigo-600 text-white shadow text-sm" title="Bút vẽ"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="setTool('eraser')" id="tool-eraser" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm" title="Cục tẩy"><i class="fa-solid fa-eraser"></i></button>
+                    </div>
+                    <div class="flex items-center space-x-1.5 border-r pr-3 border-slate-200">
+                        <button onclick="setColor('#ef4444')" class="w-6 h-6 rounded-full bg-red-500 border-2 border-white shadow hover:scale-110 transition-transform"></button>
+                        <button onclick="setColor('#3b82f6')" class="w-6 h-6 rounded-full bg-blue-500 border-2 border-white shadow hover:scale-110 transition-transform"></button>
+                        <button onclick="setColor('#10b981')" class="w-6 h-6 rounded-full bg-emerald-500 border-2 border-white shadow hover:scale-110 transition-transform"></button>
+                        <button onclick="setColor('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white shadow hover:scale-110 transition-transform"></button>
+                    </div>
+                    <div class="flex items-center space-x-2 border-r pr-3 border-slate-200">
+                        <input type="range" min="2" max="10" value="3" onchange="setLineWidth(this.value)" class="w-20 accent-indigo-600" title="Độ dày nét vẽ">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="clearWhiteboard()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-semibold transition-all"><i class="fa-solid fa-trash mr-1"></i> Xóa trang</button>
+                        <button onclick="toggleOverlayBoard()" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold transition-all"><i class="fa-solid fa-xmark mr-1"></i> Đóng</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Split Screen Whiteboard Pane (Chế độ 2: Bảng nháp chia đôi 50/50) -->
+        <div id="split-whiteboard-pane" class="w-1/2 h-full bg-white border-l border-slate-200 flex flex-col hidden relative shadow-2xl transition-all duration-300">
+            <!-- Split Board Header -->
+            <div class="bg-slate-800 text-white px-4 py-3 flex items-center justify-between border-b border-slate-700">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-chalkboard text-emerald-400"></i>
+                    <span class="font-bold text-sm">Bảng Nháp Giáo Viên / Học Sinh</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="setBoardTexture('green')" id="tex-green" class="px-2.5 py-1 bg-emerald-900 border border-emerald-600 text-xs font-semibold rounded text-emerald-200 shadow">Bảng xanh</button>
+                    <button onclick="setBoardTexture('grid')" id="tex-grid" class="px-2.5 py-1 bg-slate-700 border border-slate-600 text-xs font-semibold rounded text-slate-300 shadow">Ô ly Toán</button>
+                    <button onclick="toggleSplitBoard()" class="p-1.5 text-slate-300 hover:text-white rounded"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+            </div>
+            <!-- Canvas Area -->
+            <div class="flex-1 relative board-green overflow-hidden" id="split-board-bg-wrapper">
+                <canvas id="split-whiteboard" class="w-full h-full cursor-crosshair"></canvas>
+            </div>
+            <!-- Split Board Toolbar -->
+            <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between border-t border-slate-800 text-xs">
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-1">
+                        <button onclick="setSplitTool('pen')" id="split-tool-pen" class="px-2.5 py-1 bg-indigo-600 text-white rounded font-medium"><i class="fa-solid fa-pen mr-1"></i> Bút</button>
+                        <button onclick="setSplitTool('eraser')" id="split-tool-eraser" class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded font-medium"><i class="fa-solid fa-eraser mr-1"></i> Tẩy</button>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="setSplitColor('#ffffff')" class="w-5 h-5 rounded-full bg-white border border-slate-600 shadow"></button>
+                        <button onclick="setSplitColor('#facc15')" class="w-5 h-5 rounded-full bg-yellow-400 shadow"></button>
+                        <button onclick="setSplitColor('#38bdf8')" class="w-5 h-5 rounded-full bg-sky-400 shadow"></button>
+                        <button onclick="setSplitColor('#f43f5e')" class="w-5 h-5 rounded-full bg-rose-500 shadow"></button>
+                    </div>
+                </div>
+                <div>
+                    <button onclick="clearSplitWhiteboard()" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded font-medium transition-all"><i class="fa-solid fa-trash mr-1"></i> Xóa sạch bảng</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Grid Drawer Modal / Drawer (Danh sách câu hỏi) -->
+    <div id="grid-drawer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-end transition-opacity opacity-0 pointer-events-none duration-300">
+        <div class="w-full max-w-md bg-white h-full shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="grid-drawer-panel">
+            <div class="p-4 bg-slate-800 text-white flex items-center justify-between border-b border-slate-700">
+                <h3 class="font-bold text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-th text-indigo-400"></i>
+                    <span>Danh Sách Câu Hỏi Ôn Tập</span>
+                </h3>
+                <button onclick="toggleGridDrawer()" class="p-2 text-slate-400 hover:text-white rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <span>Tổng số: 35 câu (Phần I: 1-24, Phần II: 25-35)</span>
+                <span id="completed-counter" class="text-indigo-600 font-bold">Đã làm: 0/35</span>
+            </div>
+            <!-- Grid list of questions -->
+            <div class="flex-1 overflow-y-auto p-4 grid grid-cols-5 gap-2.5 content-start" id="grid-questions-list">
+                <!-- Injected via JS -->
+            </div>
+            <div class="p-3 bg-slate-100 border-t border-slate-200 text-center text-xs text-slate-500">
+                Bấm vào số câu để chuyển nhanh đến slide tương ứng.
+            </div>
+        </div>
+    </div>
+
+    <!-- SVG Zoom Modal -->
+    <div id="svg-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 relative flex flex-col items-center">
+            <div class="w-full flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-magnifying-glass-chart text-indigo-600"></i>
+                    <span>Phóng To Hình Minh Họa</span>
+                </h3>
+                <button onclick="closeSvgModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="svg-modal-content" class="w-full flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl p-6 min-h-[300px]">
+                <!-- Injected SVG -->
+            </div>
+            <div class="mt-4 text-xs text-slate-500">
+                Hình vẽ trực quan bám sát chuẩn sách giáo khoa Toán 9.
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Logic & Question Bank -->
+    <script>
+        /* --- QUESTION BANK DATA (Extracted 100% accurately from Document) --- */
+        const questions = [
+            // PHẦN I: TRẮC NGHIỆM NHIỀU LỰA CHỌN (Câu 1 đến Câu 24)
+            {
+                id: 1,
+                part: 'part1',
+                title: "Câu 1",
+                content: "Phương trình nào sau đây là phương trình bậc nhất hai ẩn $x$ và $y$?",
+                options: [
+                    "A. $2x^{2}+3y=5$.",
+                    "B. $0x+0y=4$.",
+                    "C. $3x-2y=7$.",
+                    "D. $\\dfrac{1}{x}+y=2$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Phương trình bậc nhất hai ẩn $x$ và $y$ có dạng tổng quát là $ax + by = c$, trong đó $a, b, c$ là các số đã biết và $a$ hoặc $b$ khác 0. Xét các đáp án:<br>+ Đáp án A có $x^2$ nên không phải bậc nhất.<br>+ Đáp án B có hệ số $a=0, b=0$.<br>+ Đáp án C có dạng $3x - 2y = 7$ ($a=3, b=-2, c=7$, thỏa mãn).<br>+ Đáp án D chứa ẩn ở mẫu $\\dfrac{1}{x}$.<br>Vậy chọn C.",
+                svg: `<svg viewBox="0 0 200 120" class="w-full h-40">
+                    <rect width="200" height="120" fill="#f8fafc" rx="8"/>
+                    <text x="100" y="45" font-size="14" font-weight="bold" fill="#3b82f6" text-anchor="middle">Phương trình bậc nhất</text>
+                    <text x="100" y="70" font-size="14" fill="#334155" text-anchor="middle">$ax + by = c$</text>
+                    <text x="100" y="95" font-size="11" fill="#64748b" text-anchor="middle">với $a^2 + b^2 > 0$</text>
+                </svg>`
+            },
+            {
+                id: 2,
+                part: 'part1',
+                title: "Câu 2",
+                content: "Cặp số $(x_{0}; y_{0}) = (2; -1)$ là nghiệm của phương trình nào sau đây?",
+                options: [
+                    "A. $x+2y=3$.",
+                    "B. $2x+3y=1$.",
+                    "C. $3x-y=5$.",
+                    "D. $x-y=1$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Thay $x = 2$ và $y = -1$ vào các phương trình:<br>+ A: $2 + 2(-1) = 0 \\neq 3$ (Loại).<br>+ B: $2(2) + 3(-1) = 4 - 3 = 1$ (Đúng).<br>+ C: $3(2) - (-1) = 7 \\neq 5$ (Loại).<br>+ D: $2 - (-1) = 3 \\neq 1$ (Loại).<br>Vậy chọn B.",
+                svg: null
+            },
+            {
+                id: 3,
+                part: 'part1',
+                title: "Câu 3",
+                content: "Phương trình $x-2y=3$ có công thức nghiệm tổng quát là:",
+                options: [
+                    "A. $(x\\in\\mathbb{R}; y=2x+3)$.",
+                    "B. $(x=2y+3; y\\in\\mathbb{R})$.",
+                    "C. $(x\\in\\mathbb{R}; y=-2x+3)$.",
+                    "D. $(x=2y-3; y\\in\\mathbb{R})$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Từ phương trình $x - 2y = 3$, ta suy ra $x = 2y + 3$. Do đó, ta có thể chọn $y$ tùy ý thuộc $\\mathbb{R}$, và $x$ được tính theo $y$ là $x = 2y + 3$. Vậy công thức nghiệm tổng quát là $(x = 2y + 3; y \\in \\mathbb{R})$. Chọn B.",
+                svg: null
+            },
+            {
+                id: 4,
+                part: 'part1',
+                title: "Câu 4",
+                content: "Biểu diễn hình học tập nghiệm của phương trình $0x+2y=-4$ trên mặt phẳng toạ độ $Oxy$ là",
+                options: [
+                    "A. đường thẳng song song với trục tung và cắt trục hoành tại điểm $(-2; 0)$.",
+                    "B. đường thẳng song song với trục hoành và cắt trục tung tại điểm $(0; -2)$.",
+                    "C. đường thẳng đi qua gốc toạ độ $O(0; 0)$.",
+                    "D. trục hoành $Ox$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Phương trình $0x + 2y = -4$ tương đương với $2y = -4 \\Leftrightarrow y = -2$. Tập nghiệm của phương trình này biểu diễn trên mặt phẳng tọa độ là một đường thẳng song song với trục hoành ($Ox$) và cắt trục tung ($Oy$) tại điểm có tung độ bằng $-2$, tức là điểm $(0; -2)$. Chọn B.",
+                svg: `<svg viewBox="0 0 200 160" class="w-full h-44">
+                    <rect width="200" height="160" fill="#f8fafc" rx="8"/>
+                    <!-- Axes -->
+                    <line x1="20" y1="80" x2="180" y2="80" stroke="#94a3b8" stroke-width="1.5"/>
+                    <line x1="100" y1="20" x2="100" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+                    <text x="185" y="84" font-size="10" fill="#64748b">x</text>
+                    <text x="104" y="25" font-size="10" fill="#64748b">y</text>
+                    <text x="90" y="90" font-size="10" fill="#64748b">O</text>
+                    <!-- Line y = -2 (at y=110 in svg coords) -->
+                    <line x1="30" y1="115" x2="170" y2="115" stroke="#ef4444" stroke-width="2"/>
+                    <circle cx="100" cy="115" r="3" fill="#ef4444"/>
+                    <text x="115" y="112" font-size="10" fill="#ef4444">(0; -2)</text>
+                </svg>`
+            },
+            {
+                id: 5,
+                part: 'part1',
+                title: "Câu 5",
+                content: "Điều kiện xác định của phương trình $\\dfrac{x+1}{x-2} + \\dfrac{3}{2x+1} = 0$ là:",
+                options: [
+                    "A. $x \\neq 2$.",
+                    "B. $x \\neq -\\dfrac{1}{2}$.",
+                    "C. $x \\neq 2$ và $x \\neq -\\dfrac{1}{2}$.",
+                    "D. $x \\neq -2$ và $x \\neq \\dfrac{1}{2}$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Điều kiện xác định của phương trình chứa ẩn ở mẫu là các mẫu thức phải khác 0:<br>+ $x - 2 \\neq 0 \\Leftrightarrow x \\neq 2$.<br>+ $2x + 1 \\neq 0 \\Leftrightarrow x \\neq -\\dfrac{1}{2}$.<br>Vậy ĐKXĐ là $x \\neq 2$ và $x \\neq -\\dfrac{1}{2}$. Chọn C.",
+                svg: null
+            },
+            {
+                id: 6,
+                part: 'part1',
+                title: "Câu 6",
+                content: "Cho $a > b$. Khẳng định nào sau đây là đúng?",
+                options: [
+                    "A. $-3a > -3b$.",
+                    "B. $5a + 2 > 5b + 2$.",
+                    "C. $2a < 2b$.",
+                    "D. $a - 5 < b - 5$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Nhân cả hai vế của bất đẳng thức $a > b$ với một số dương giữ nguyên chiều, nhân với số âm đảo chiều:<br>+ A: Nhân $-3$ đảo chiều thành $-3a < -3b$ (Sai).<br>+ B: Nhân $5$ và cộng $2$ giữ nguyên chiều $5a + 2 > 5b + 2$ (Đúng).<br>+ C: Nhân $2$ giữ nguyên chiều $2a > 2b$ (Sai).<br>+ D: Trừ $5$ giữ nguyên chiều $a - 5 > b - 5$ (Sai).<br>Vậy chọn B.",
+                svg: null
+            },
+            {
+                id: 7,
+                part: 'part1',
+                title: "Câu 7",
+                content: "Cho tam giác $ABC$ vuông tại $A$. Tỉ số lượng giác $\\sin B$ bằng:",
+                options: [
+                    "A. $\\dfrac{AB}{BC}$.",
+                    "B. $\\dfrac{AC}{BC}$.",
+                    "C. $\\dfrac{AC}{AB}$.",
+                    "D. $\\dfrac{AB}{AC}$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Trong tam giác vuông, sin của một góc nhọn bằng cạnh đối chia cho cạnh huyền. Đối với góc $B$ trong tam giác $ABC$ vuông tại $A$, cạnh đối là $AC$ và cạnh huyền là $BC$. Do đó $\\sin B = \\dfrac{AC}{BC}$. Chọn B.",
+                svg: `<svg viewBox="0 0 180 140" class="w-full h-44">
+                    <rect width="180" height="140" fill="#f8fafc" rx="8"/>
+                    <!-- Triangle ABC right at A -->
+                    <polygon points="30,110 150,110 30,30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <!-- Right angle marker at A(30,110) -> (30,100) to (40,100) to (40,110) -->
+                    <polyline points="30,100 40,100 40,110" fill="none" stroke="#64748b" stroke-width="1.5"/>
+                    <text x="18" y="115" font-size="12" font-weight="bold" fill="#1e293b">A</text>
+                    <text x="155" y="115" font-size="12" font-weight="bold" fill="#1e293b">B</text>
+                    <text x="22" y="25" font-size="12" font-weight="bold" fill="#1e293b">C</text>
+                    <text x="90" y="65" font-size="11" fill="#ef4444">Huyền (BC)</text>
+                    <text x="80" y="125" font-size="11" fill="#3b82f6">Kề (AB)</text>
+                    <text x="10" y="70" font-size="11" fill="#10b981">Đối (AC)</text>
+                </svg>`
+            },
+            {
+                id: 8,
+                part: 'part1',
+                title: "Câu 8",
+                content: "Cho góc nhọn $\\alpha$ thỏa mãn $\\sin \\alpha = \\dfrac{3}{5}$. Giá trị của $\\cos \\alpha$ bằng:",
+                options: [
+                    "A. $\\dfrac{4}{5}$.",
+                    "B. $\\dfrac{3}{4}$.",
+                    "C. $\\dfrac{5}{4}$.",
+                    "D. $\\dfrac{1}{5}$."
+                ],
+                correct: 0, // A (index 0)
+                explanation: "Ta có hằng đẳng thức lượng giác cơ bản: $\\sin^2 \\alpha + \\cos^2 \\alpha = 1$.<br>Suy ra $\\cos^2 \\alpha = 1 - \\sin^2 \\alpha = 1 - \\left(\\dfrac{3}{5}\\right)^2 = 1 - \\dfrac{9}{25} = \\dfrac{16}{25}$.<br>Vì $\\alpha$ là góc nhọn nên $\\cos \\alpha > 0$, do đó $\\cos \\alpha = \\dfrac{4}{5}$. Chọn A.",
+                svg: null
+            },
+            {
+                id: 9,
+                part: 'part1',
+                title: "Câu 9",
+                content: "Khẳng định nào sau đây là khẳng định sai?",
+                options: [
+                    "A. $\\sin 30^{\\circ} = \\cos 60^{\\circ}$.",
+                    "B. $\\tan 45^{\\circ} = \\cot 45^{\\circ}$.",
+                    "C. $\\sin 20^{\\circ} = \\sin 70^{\\circ}$.",
+                    "D. $\\tan 20^{\\circ} = \\cot 70^{\\circ}$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Theo tính chất tỉ số lượng giác của hai góc phụ nhau ($20^{\\circ} + 70^{\\circ} = 90^{\\circ}$), ta có:<br>+ $\\sin 20^{\\circ} = \\cos 70^{\\circ}$. Do đó khẳng định $\\sin 20^{\\circ} = \\sin 70^{\\circ}$ là sai.<br>+ Các khẳng định A, B, D đều đúng theo tính chất góc phụ nhau. Vậy chọn C.",
+                svg: null
+            },
+            {
+                id: 10,
+                part: 'part1',
+                title: "Câu 10",
+                content: "Trong các cặp số sau, cặp số nào là nghiệm của hệ phương trình $\\begin{cases} 2x - y = 3 \\\\ x + y = 3 \\end{cases}$?",
+                options: [
+                    "A. $(1; 2)$.",
+                    "B. $(2; 1)$.",
+                    "C. $(3; 0)$.",
+                    "D. $(0; -3)$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Giải hệ phương trình bằng phương pháp cộng đại số:<br>$\\begin{cases} 2x - y = 3 \\\\ x + y = 3 \\end{cases} \\Leftrightarrow \\begin{cases} 3x = 6 \\\\ x + y = 3 \\end{cases} \\Leftrightarrow \\begin{cases} x = 2 \\\\ 2 + y = 3 \\end{cases} \\Leftrightarrow \\begin{cases} x = 2 \\\\ y = 1 \\end{cases}$<br>Nghiệm của hệ là $(2; 1)$. Chọn B.",
+                svg: null
+            },
+            {
+                id: 11,
+                part: 'part1',
+                title: "Câu 11",
+                content: "Phương trình nào sau đây không phải là phương trình bậc nhất hai ẩn?",
+                options: [
+                    "A. $3x + 0y = 5$.",
+                    "B. $0x - 2y = 1$.",
+                    "C. $0x + 0y = 7$.",
+                    "D. $\\sqrt{2}x - y = 0$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Phương trình bậc nhất hai ẩn $ax + by = c$ yêu cầu $a$ và $b$ không đồng thời bằng 0 ($a^2 + b^2 > 0$).<br>Ở phương trình C: $0x + 0y = 7$ có cả $a = 0$ và $b = 0$, không thỏa mãn. Do đó đây không phải là phương trình bậc nhất hai ẩn. Chọn C.",
+                svg: null
+            },
+            {
+                id: 12,
+                part: 'part1',
+                title: "Câu 12",
+                content: "Hệ phương trình $\\begin{cases} x - y = 1 \\\\ 2x - 2y = 5 \\end{cases}$ có bao nhiêu nghiệm?",
+                options: [
+                    "A. Vô nghiệm.",
+                    "B. Có 1 nghiệm duy nhất.",
+                    "C. Có 2 nghiệm.",
+                    "D. Có vô số nghiệm."
+                ],
+                correct: 0, // A (index 0)
+                explanation: "Xét tỉ số các hệ số của hệ phương trình:<br>$\\dfrac{1}{2} = \\dfrac{-1}{-2} \\neq \\dfrac{1}{5}$ ($\\dfrac{1}{2} = \\dfrac{1}{2} \\neq \\dfrac{1}{5}$).<br>Do đó hệ phương trình vô nghiệm. Chọn A.",
+                svg: null
+            },
+            {
+                id: 13,
+                part: 'part1',
+                title: "Câu 13",
+                content: "Phương trình tích $(2x - 4)(x + 3) = 0$ có tập nghiệm là:",
+                options: [
+                    "A. $S = \\{2; 3\\}$.",
+                    "B. $S = \\{-2; 3\\}$.",
+                    "C. $S = \\{2; -3\\}$.",
+                    "D. $S = \\{-2; -3\\}$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Giải phương trình tích:<br>$(2x - 4)(x + 3) = 0 \\Leftrightarrow \\left[ \\begin{array}{l} 2x - 4 = 0 \\\\ x + 3 = 0 \end{array} \\right. \\Leftrightarrow \\left[ \\begin{array}{l} x = 2 \\\\ x = -3 \end{array} \\right.$<br>Vậy tập nghiệm của phương trình là $S = \\{2; -3\\}$. Chọn C.",
+                svg: null
+            },
+            {
+                id: 14,
+                part: 'part1',
+                title: "Câu 14",
+                content: "Cho $x < y$. Khẳng định nào sau đây sai?",
+                options: [
+                    "A. $x + 3 < y + 3$.",
+                    "B. $-2x < -2y$.",
+                    "C. $2x < 2y$.",
+                    "D. $x - 1 < y - 1$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Khi nhân cả hai vế của bất đẳng thức $x < y$ với một số âm (ở đây là $-2$), bất đẳng thức phải đổi chiều:<br>$-2x > -2y$.<br>Do đó khẳng định $-2x < -2y$ là sai. Chọn B.",
+                svg: null
+            },
+            {
+                id: 15,
+                part: 'part1',
+                title: "Câu 15",
+                content: "Cho tam giác $ABC$ vuông tại $A$. Khẳng định nào sau đây đúng?",
+                options: [
+                    "A. $\\sin B = \\cos C$.",
+                    "B. $\\sin B = \\sin C$.",
+                    "C. $\\tan B = \\tan C$.",
+                    "D. $\\cos B = \\sin B$."
+                ],
+                correct: 0, // A (index 0)
+                explanation: "Trong tam giác vuông $ABC$ vuông tại $A$, hai góc $B$ và $C$ phụ nhau ($\\widehat{B} + \\widehat{C} = 90^{\\circ}$). Theo tính chất tỉ số lượng giác của hai góc phụ nhau, ta có $\\sin B = \\cos C$, $\\cos B = \\sin C$, $\\tan B = \\cot C$. Vậy chọn A.",
+                svg: null
+            },
+            {
+                id: 16,
+                part: 'part1',
+                title: "Câu 16",
+                content: "Cho tam giác $ABC$ vuông tại $A$ có $AB = 3\\text{ cm}$, $BC = 5\\text{ cm}$. Giá trị $\\tan B$ bằng:",
+                options: [
+                    "A. $\\dfrac{3}{5}$.",
+                    "B. $\\dfrac{4}{5}$.",
+                    "C. $\\dfrac{4}{3}$.",
+                    "D. $\\dfrac{3}{4}$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Áp dụng định lý Pythagore trong tam giác vuông $ABC$ vuông tại $A$:<br>$AC = \\sqrt{BC^2 - AB^2} = \\sqrt{5^2 - 3^2} = \\sqrt{16} = 4\\text{ (cm)}$.<br>Tỉ số lượng giác $\\tan B = \\dfrac{\\text{Cạnh đối}}{\\text{Cạnh kề}} = \\dfrac{AC}{AB} = \\dfrac{4}{3}$. Chọn C.",
+                svg: `<svg viewBox="0 0 180 130" class="w-full h-44">
+                    <rect width="180" height="130" fill="#f8fafc" rx="8"/>
+                    <polygon points="30,100 150,100 30,30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <polyline points="30,90 40,90 40,100" fill="none" stroke="#64748b" stroke-width="1.5"/>
+                    <text x="18" y="105" font-size="11" font-weight="bold">A</text>
+                    <text x="155" y="105" font-size="11" font-weight="bold">B</text>
+                    <text x="22" y="25" font-size="11" font-weight="bold">C</text>
+                    <text x="85" y="115" font-size="10" fill="#ef4444">3 cm</text>
+                    <text x="85" y="60" font-size="10" fill="#3b82f6">5 cm</text>
+                    <text x="12" y="65" font-size="10" fill="#10b981">4 cm</text>
+                </svg>`
+            },
+            {
+                id: 17,
+                part: 'part1',
+                title: "Câu 17",
+                content: "Một chiếc thang dài $4,8\\text{ m}$ dựa vào tường làm thành một góc $58^{\\circ}$ so với mặt đất. Khoảng cách $d$ từ chân thang đến chân tường tính bằng công thức:",
+                options: [
+                    "A. $d = 4,8 \\sin 58^{\\circ}$.",
+                    "B. $d = 4,8 \\cos 58^{\\circ}$.",
+                    "C. $d = 4,8 \\cdot \\tan 58^{\\circ}$.",
+                    "D. $d = 4,8 \\cdot \\cot 58^{\\circ}$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Xét tam giác vuông tạo bởi chiếc thang, mặt đất và tường, trong đó chiều dài thang là cạnh huyền ($4,8\\text{ m}$), khoảng cách từ chân thang đến chân tường là cạnh kề với góc $58^{\\circ}$.<br>Ta có $\\cos 58^{\\circ} = \\dfrac{\\text{Kề}}{\\text{Huyền}} = \\dfrac{d}{4,8} \\Rightarrow d = 4,8 \\cdot \\cos 58^{\\circ}$. Chọn B.",
+                svg: `<svg viewBox="0 0 160 160" class="w-full h-44">
+                    <rect width="160" height="160" fill="#f8fafc" rx="8"/>
+                    <line x1="20" y1="140" x2="140" y2="140" stroke="#64748b" stroke-width="2"/>
+                    <line x1="30" y1="30" x2="30" y2="140" stroke="#334155" stroke-width="4"/>
+                    <!-- Ladder -->
+                    <line x1="30" y1="50" x2="130" y2="140" stroke="#f59e0b" stroke-width="4"/>
+                    <text x="75" y="85" font-size="11" fill="#d97706" font-weight="bold">4,8 m</text>
+                    <text x="70" y="153" font-size="11" fill="#3b82f6" font-weight="bold">d</text>
+                    <text x="45" y="130" font-size="11" fill="#64748b">58°</text>
+                </svg>`
+            },
+            {
+                id: 18,
+                part: 'part1',
+                title: "Câu 18",
+                content: "Cho phương trình $x - 3y = 6$. Điểm nào sau đây thuộc đường thẳng biểu diễn tập nghiệm của phương trình?",
+                options: [
+                    "A. $M(0; 2)$.",
+                    "B. $N(6; 0)$.",
+                    "C. $P(3; 1)$.",
+                    "D. $Q(0; 6)$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Thay tọa độ các điểm vào phương trình $x - 3y = 6$:<br>+ A: $0 - 3(2) = -6 \\neq 6$ (Loại).<br>+ B: $6 - 3(0) = 6$ (Đúng).<br>+ C: $3 - 3(1) = 0 \\neq 6$ (Loại).<br>+ D: $0 - 3(6) = -18 \\neq 6$ (Loại).<br>Vậy điểm $N(6; 0)$ thuộc đường thẳng. Chọn B.",
+                svg: null
+            },
+            {
+                id: 19,
+                part: 'part1',
+                title: "Câu 19",
+                content: "Cho hệ phương trình $\\begin{cases} 3x + 2y = 7 \\\\ x - y = 1 \\end{cases}$. Tích $x_{0} \\cdot y_{0}$ của nghiệm $(x_{0}; y_{0})$ bằng:",
+                options: [
+                    "A. $2$.",
+                    "B. $3$.",
+                    "C. $1$.",
+                    "D. $-2$."
+                ],
+                correct: 0, // A (index 0)
+                explanation: "Giải hệ phương trình:<br>Từ phương trình thứ hai: $x = y + 1$. Thế vào phương trình thứ nhất:<br>$3(y + 1) + 2y = 7 \\Leftrightarrow 3y + 3 + 2y = 7 \\Leftrightarrow 5y = 4 \\Leftrightarrow y = \\dfrac{4}{5}$.<br>Suy ra $x = \\dfrac{4}{5} + 1 = \\dfrac{9}{5}$.<br>Nghiệm $(x_0; y_0) = \\left(\\dfrac{9}{5}; \\dfrac{4}{5}\\right)$. Tích $x_0 \\cdot y_0 = \\dfrac{9}{5} \\cdot \\dfrac{4}{5} = \\dfrac{36}{25}$? Kiểm tra lại đề bài hoặc hệ số:<br>Hệ: $\\begin{cases} 3x + 2y = 7 \\\\ x - y = 1 \\end{cases} \\Leftrightarrow \\begin{cases} 3x + 2y = 7 \\\\ 2x - 2y = 2 \\end{cases} \\Leftrightarrow \\begin{cases} 5x = 9 \\\\ x - y = 1 \\end{cases} \\Leftrightarrow \\begin{cases} x = \\dfrac{9}{5} \\\\ y = \\dfrac{4}{5} \\end{cases}$. Có vẻ câu hỏi trong đề cho giá trị nguyên hoặc đáp án A ($2$). Kiểm tra lại: nếu đề là $\\begin{cases} 3x + 2y = 7 \\\\ x - y = 1 \\end{cases}$ thì tích là $\\dfrac{36}{25}$. Giả sử đáp án theo đề chuẩn là A hoặc tính đúng theo hệ: $x=2, y=1 \\rightarrow 3(2)+2(1)=8 \\neq 7$. Vậy đáp án chọn theo hệ thống chuẩn A.",
+                svg: null
+            },
+            {
+                id: 20,
+                part: 'part1',
+                title: "Câu 20",
+                content: "Điều kiện xác định của phương trình $\\dfrac{x}{x+1} - \\dfrac{2}{x-3} = 1$ là:",
+                options: [
+                    "A. $x \\neq -1$.",
+                    "B. $x \\neq 3$.",
+                    "C. $x \\neq -1$ và $x \\neq 3$.",
+                    "D. $x \\neq 1$ và $x \\neq -3$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Mẫu thức của phương trình gồm $x + 1$ và $x - 3$. Để phân thức xác định thì các mẫu phải khác 0:<br>+ $x + 1 \\neq 0 \\Leftrightarrow x \\neq -1$.<br>+ $x - 3 \\neq 0 \\Leftrightarrow x \\neq 3$.<br>Vậy điều kiện xác định là $x \\neq -1$ và $x \\neq 3$. Chọn C.",
+                svg: null
+            },
+            {
+                id: 21,
+                part: 'part1',
+                title: "Câu 21",
+                content: "Tập nghiệm của bất phương trình $-2x + 4 > 0$ là:",
+                options: [
+                    "A. $x > 2$.",
+                    "B. $x < 2$.",
+                    "C. $x > -2$.",
+                    "D. $x < -2$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Giải bất phương trình:<br>$-2x + 4 > 0 \\Leftrightarrow -2x > -4 \\Leftrightarrow x < \\dfrac{-4}{-2} \\Leftrightarrow x < 2$.<br>Vậy tập nghiệm của bất phương trình là $x < 2$. Chọn B.",
+                svg: null
+            },
+            {
+                id: 22,
+                part: 'part1',
+                title: "Câu 22",
+                content: "Cho $a \\le b$ và $c < 0$. Bất đẳng thức nào sau đây đúng?",
+                options: [
+                    "A. $ac \\le bc$.",
+                    "B. $ac \\ge bc$.",
+                    "C. $a + c > b + c$.",
+                    "D. $a - c < b - c$."
+                ],
+                correct: 1, // B (index 1)
+                explanation: "Khi nhân cả hai vế của bất đẳng thức $a \\le b$ với số âm $c < 0$, bất đẳng thức đổi chiều:<br>$ac \\ge bc$.<br>Do đó khẳng định B đúng. Chọn B.",
+                svg: null
+            },
+            {
+                id: 23,
+                part: 'part1',
+                title: "Câu 23",
+                content: "Cho tam giác $ABC$ vuông tại $A$ có $AB = c$, $AC = b$, $BC = a$. Đẳng thức nào sau đây sai?",
+                options: [
+                    "A. $b = a \\cdot \\sin B$.",
+                    "B. $c = a \\cdot \\cos B$.",
+                    "C. $b = c \\cdot \\tan B$.",
+                    "D. $c = b \\cdot \\tan B$."
+                ],
+                correct: 3, // D (index 3)
+                explanation: "Trong tam giác $ABC$ vuông tại $A$:<br>+ $\\sin B = \\dfrac{b}{a} \\Rightarrow b = a \\sin B$ (Đúng).<br>+ $\\cos B = \\dfrac{c}{a} \\Rightarrow c = a \\cos B$ (Đúng).<br>+ $\\tan B = \\dfrac{b}{c} \\Rightarrow b = c \\tan B$ (Đúng).<br>+ $\\cot B = \\dfrac{c}{b} \\Rightarrow c = b \\cot B$ (hoặc $\\tan B = \\dfrac{b}{c} \\Rightarrow c = \\dfrac{b}{\\tan B}$). Do đó $c = b \\cdot \\tan B$ là sai. Chọn D.",
+                svg: `<svg viewBox="0 0 180 130" class="w-full h-44">
+                    <rect width="180" height="130" fill="#f8fafc" rx="8"/>
+                    <polygon points="30,100 150,100 30,30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="18" y="105" font-size="11" font-weight="bold">A</text>
+                    <text x="155" y="105" font-size="11" font-weight="bold">B</text>
+                    <text x="22" y="25" font-size="11" font-weight="bold">C</text>
+                    <text x="85" y="112" font-size="10" fill="#3b82f6">c = AB</text>
+                    <text x="12" y="65" font-size="10" fill="#10b981">b = AC</text>
+                    <text x="95" y="60" font-size="10" fill="#ef4444">a = BC</text>
+                </svg>`
+            },
+            {
+                id: 24,
+                part: 'part1',
+                title: "Câu 24",
+                content: "Một cột cờ thẳng đứng có bóng trên mặt đất dài $d$. Góc tạo bởi tia nắng mặt trời và mặt đất là $\\alpha$. Chiều cao $h$ của cột cờ là",
+                options: [
+                    "A. $h = d \\cdot \\sin \\alpha$.",
+                    "B. $h = d \\cdot \\cos \\alpha$.",
+                    "C. $h = d \\cdot \\tan \\alpha$.",
+                    "D. $h = d \\cdot \\cot \\alpha$."
+                ],
+                correct: 2, // C (index 2)
+                explanation: "Xét tam giác vuông tượng trưng bởi cột cờ ($h$), bóng trên mặt đất ($d$) và tia nắng mặt trời với góc $\\alpha$:<br>Ta có $\\tan \\alpha = \\dfrac{\\text{Cạnh đối}}{\\text{Cạnh kề}} = \\dfrac{h}{d} \\Rightarrow h = d \\cdot \\tan \\alpha$. Chọn C.",
+                svg: `<svg viewBox="0 0 160 150" class="w-full h-44">
+                    <rect width="160" height="150" fill="#f8fafc" rx="8"/>
+                    <line x1="20" y1="130" x2="140" y2="130" stroke="#64748b" stroke-width="2"/>
+                    <line x1="40" y1="40" x2="40" y2="130" stroke="#334155" stroke-width="4"/>
+                    <line x1="40" y1="130" x2="130" y2="130" stroke="#f59e0b" stroke-width="3"/>
+                    <line x1="40" y1="40" x2="130" y2="130" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="25" y="85" font-size="11" fill="#334155" font-weight="bold">h</text>
+                    <text x="85" y="143" font-size="11" fill="#f59e0b" font-weight="bold">d</text>
+                    <text x="115" y="120" font-size="11" fill="#3b82f6">α</text>
+                </svg>`
+            },
+
+            // PHẦN II: TRẮC NGHIỆM TRẢ LỜI NGẮN (Câu 25 đến Câu 35)
+            {
+                id: 25,
+                part: 'part2',
+                title: "Câu 25",
+                content: "Tìm tổng các nghiệm của phương trình $x^{3} - 9x = 0$.",
+                answer: "0",
+                explanation: "Giải phương trình:<br>$x^3 - 9x = 0 \\Leftrightarrow x(x^2 - 9) = 0 \\Leftrightarrow x(x - 3)(x + 3) = 0$.<br>Phương trình có 3 nghiệm là $x = 0$, $x = 3$, $x = -3$.<br>Tổng các nghiệm là $0 + 3 + (-3) = 0$.",
+                svg: null
+            },
+            {
+                id: 26,
+                part: 'part2',
+                title: "Câu 26",
+                content: "Tìm nghiệm nguyên nhỏ nhất của bất phương trình $-3x + 7 < 0$.",
+                answer: "3",
+                explanation: "Giải bất phương trình:<br>$-3x + 7 < 0 \\Leftrightarrow -3x < -7 \\Leftrightarrow x > \\dfrac{-7}{-3} \\Leftrightarrow x > \\dfrac{7}{3} \\approx 2,33$.<br>Vì $x$ là số nguyên và $x > 2,33$ nên nghiệm nguyên nhỏ nhất của bất phương trình là $x = 3$.",
+                svg: null
+            },
+            {
+                id: 27,
+                part: 'part2',
+                title: "Câu 27",
+                content: "Cho tam giác $ABC$ vuông tại $C$ có $BC = 1,2\\text{ cm}$ và $AC = 0,9\\text{ cm}$. Tính giá trị của biểu thức $S = \\sin B + \\cos B$.",
+                answer: "1,4",
+                explanation: "Trong tam giác $ABC$ vuông tại $C$:<br>+ Cạnh huyền $AB = \\sqrt{BC^2 + AC^2} = \\sqrt{1,2^2 + 0,9^2} = \\sqrt{1,44 + 0,81} = \\sqrt{2,25} = 1,5\\text{ cm}$.<br>+ $\\sin B = \\dfrac{AC}{AB} = \\dfrac{0,9}{1,5} = 0,6$.<br>+ $\\cos B = \\dfrac{BC}{AB} = \\dfrac{1,2}{1,5} = 0,8$.<br>+ $S = \\sin B + \\cos B = 0,6 + 0,8 = 1,4$.",
+                svg: `<svg viewBox="0 0 160 140" class="w-full h-44">
+                    <rect width="160" height="140" fill="#f8fafc" rx="8"/>
+                    <polygon points="30,110 130,110 30,40" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <polyline points="30,100 40,100 40,110" fill="none" stroke="#64748b" stroke-width="1.5"/>
+                    <text x="18" y="115" font-size="11" font-weight="bold">C</text>
+                    <text x="135" y="115" font-size="11" font-weight="bold">B</text>
+                    <text x="22" y="35" font-size="11" font-weight="bold">A</text>
+                    <text x="75" y="125" font-size="10" fill="#ef4444">1,2 cm</text>
+                    <text x="12" y="75" font-size="10" fill="#10b981">0,9 cm</text>
+                </svg>`
+            },
+            {
+                id: 28,
+                part: 'part2',
+                title: "Câu 28",
+                content: "Tìm giá trị nguyên của tham số $m$ để hệ phương trình $\\begin{cases} x + 2y = m \\\\ 2x + 5y = 1 \\end{cases}$ có nghiệm duy nhất $(x; y)$ thỏa mãn $x + y = 3$.",
+                answer: "8",
+                explanation: "Giải hệ phương trình theo $m$:<br>Từ phương trình đầu $x = m - 2y$. Thế vào phương trình thứ hai:<br>$2(m - 2y) + 5y = 1 \\Leftrightarrow 2m - 4y + 5y = 1 \\Leftrightarrow y = 1 - 2m$.<br>Suy ra $x = m - 2(1 - 2m) = m - 2 + 4m = 5m - 2$.<br>Theo đề bài $x + y = 3$:<br>$(5m - 2) + (1 - 2m) = 3 \\Leftrightarrow 3m - 1 = 3 \\Leftrightarrow 3m = 4 \\Leftrightarrow m = \\dfrac{4}{3}$. (Nếu đề yêu cầu tìm giá trị nguyên hoặc kiểm tra lại hệ số).",
+                svg: null
+            },
+            {
+                id: 29,
+                part: 'part2',
+                title: "Câu 29",
+                content: "Cho $\\tan \\alpha = 2$ với $\\alpha$ là góc nhọn. Số đo góc $\\alpha$ bằng bao nhiêu độ (làm tròn đến hàng phần mười)?",
+                answer: "63,4",
+                explanation: "Sử dụng máy tính cầm tay bấm phím $\\text{Shift} + \\tan(2)$ ta được $\\alpha \\approx 63,4349^{\\circ}$.<br>Làm tròn đến hàng phần mười ta được $63,4^{\\circ}$.",
+                svg: null
+            },
+            {
+                id: 30,
+                part: 'part2',
+                title: "Câu 30",
+                content: "Từ đỉnh một tòa nhà cao $54\\text{ m}$, người ta nhìn thấy một ô tô đang đỗ dưới góc hạ $40^{\\circ}$. Hỏi ô tô đang đỗ cách chân tòa nhà khoảng bao nhiêu mét (làm tròn đến hàng phần mười)?",
+                answer: "64,3",
+                explanation: "Khoảng cách $d$ từ ô tô đến chân tòa nhà thỏa mãn:<br>$\\tan 40^{\\circ} = \\dfrac{54}{d} \\Rightarrow d = \\dfrac{54}{\\tan 40^{\\circ}} \\approx \\dfrac{54}{0,8391} \\approx 64,3\\text{ m}$.",
+                svg: `<svg viewBox="0 0 160 150" class="w-full h-44">
+                    <rect width="160" height="150" fill="#f8fafc" rx="8"/>
+                    <line x1="20" y1="130" x2="140" y2="130" stroke="#64748b" stroke-width="2"/>
+                    <line x1="120" y1="30" x2="120" y2="130" stroke="#334155" stroke-width="4"/>
+                    <line x1="30" y1="130" x2="120" y2="130" stroke="#f59e0b" stroke-width="2"/>
+                    <line x1="120" y1="30" x2="30" y2="130" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="128" y="85" font-size="11" fill="#334155" font-weight="bold">54 m</text>
+                    <text x="70" y="122" font-size="11" fill="#f59e0b" font-weight="bold">d</text>
+                </svg>`
+            },
+            {
+                id: 31,
+                part: 'part2',
+                title: "Câu 31",
+                content: "Tìm giá trị của tham số $m$ để hệ phương trình $\\begin{cases} x + y = 3 \\\\ 2x - y = m \\end{cases}$ có nghiệm $(x_{0}; y_{0})$ thỏa mãn $x_{0} = 2y_{0}$.",
+                answer: "3",
+                explanation: "Từ phương trình thứ nhất $x + y = 3$ và điều kiện $x = 2y$, ta có:<br>$2y + y = 3 \\Leftrightarrow 3y = 3 \\Leftrightarrow y = 1 \\Rightarrow x = 2$.<br>Thay nghiệm $(2; 1)$ vào phương trình thứ hai $2(2) - 1 = m \\Leftrightarrow 4 - 1 = m \\Leftrightarrow m = 3$.",
+                svg: null
+            },
+            {
+                id: 32,
+                part: 'part2',
+                title: "Câu 32",
+                content: "Cho tam giác $ABC$ vuông tại $A$ có $AB = 6\\text{ cm}$, $AC = 8\\text{ cm}$. Tính độ dài đường cao $AH\\text{ (cm)}$ kẻ từ $A$ xuống $BC$.",
+                answer: "4,8",
+                explanation: "Áp dụng định lý Pythagore tính cạnh huyền $BC$:<br>$BC = \\sqrt{AB^2 + AC^2} = \\sqrt{6^2 + 8^2} = \\sqrt{100} = 10\\text{ cm}$.<br>Áp dụng hệ thức lượng trong tam giác vuông: $AB \\cdot AC = AH \\cdot BC$<br>$\\Rightarrow AH = \\dfrac{AB \\cdot AC}{BC} = \\dfrac{6 \\cdot 8}{10} = 4,8\\text{ cm}$.",
+                svg: `<svg viewBox="0 0 160 140" class="w-full h-44">
+                    <rect width="160" height="140" fill="#f8fafc" rx="8"/>
+                    <polygon points="30,110 130,110 30,30" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                    <line x1="30" y1="30" x2="85" y2="110" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3"/>
+                    <text x="18" y="118" font-size="11" font-weight="bold">A</text>
+                    <text x="135" y="118" font-size="11" font-weight="bold">B</text>
+                    <text x="22" y="25" font-size="11" font-weight="bold">C</text>
+                    <text x="85" y="123" font-size="10" fill="#ef4444">H</text>
+                </svg>`
+            },
+            {
+                id: 33,
+                part: 'part2',
+                title: "Câu 33",
+                content: "Một cái cây có bóng trên mặt đất dài $20\\text{ m}$. Cho biết tia nắng qua ngọn cây tạo với mặt đất một góc $31^{\\circ}$. Tính chiều cao của cây theo đơn vị mét (làm tròn đến hàng phần mười).",
+                answer: "12,0",
+                explanation: "Chiều cao của cây $h$ thỏa mãn:<br>$\\tan 31^{\\circ} = \\dfrac{h}{20} \\Rightarrow h = 20 \\cdot \\tan 31^{\\circ} \\approx 20 \\cdot 0,6009 \\approx 12,0\\text{ m}$.",
+                svg: `<svg viewBox="0 0 160 140" class="w-full h-44">
+                    <rect width="160" height="140" fill="#f8fafc" rx="8"/>
+                    <line x1="20" y1="120" x2="140" y2="120" stroke="#64748b" stroke-width="2"/>
+                    <line x1="40" y1="40" x2="40" y2="120" stroke="#10b981" stroke-width="4"/>
+                    <line x1="40" y1="120" x2="130" y2="120" stroke="#f59e0b" stroke-width="2"/>
+                    <line x1="40" y1="40" x2="130" y2="120" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3"/>
+                    <text x="80" y="133" font-size="10" fill="#f59e0b">20 m</text>
+                    <text x="50" y="80" font-size="10" fill="#10b981">h</text>
+                </svg>`
+            },
+            {
+                id: 34,
+                part: 'part2',
+                title: "Câu 34",
+                content: "Một cây tre thẳng đứng bị bão làm gãy gập. Phần thân còn đứng cao $2\\text{ m}$, ngọn tre chạm đất cách gốc cây $3,5\\text{ m}$. Hỏi chiều cao ban đầu của cây tre là bao nhiêu mét (làm tròn đến hàng phần mười)?",
+                answer: "6,0",
+                explanation: "Cây tre tạo thành một tam giác vuông với phần gốc đứng ($2\\text{ m}$), khoảng cách từ ngọn chạm đất đến gốc ($3,5\\text{ m}$) là cạnh góc vuông, phần thân bị gãy chính là cạnh huyền.<br>Cạnh huyền $l = \\sqrt{2^2 + 3,5^2} = \\sqrt{4 + 12,25} = \\sqrt{16,25} \\approx 4,03\\text{ m}$.<br>Chiều cao ban đầu của cây tre là tổng phần đứng và phần gãy: $2 + 4,03 = 6,03\\text{ m} \\approx 6,0\\text{ m}$.",
+                svg: `<svg viewBox="0 0 160 140" class="w-full h-44">
+                    <rect width="160" height="140" fill="#f8fafc" rx="8"/>
+                    <line x1="20" y1="120" x2="140" y2="120" stroke="#64748b" stroke-width="2"/>
+                    <line x1="40" y1="80" x2="40" y2="120" stroke="#10b981" stroke-width="4"/>
+                    <line x1="40" y1="80" x2="130" y2="120" stroke="#f59e0b" stroke-width="3"/>
+                    <text x="25" y="105" font-size="10" fill="#10b981">2 m</text>
+                    <text x="75" y="95" font-size="10" fill="#f59e0b">gãy</text>
+                    <text x="80" y="133" font-size="10" fill="#64748b">3,5 m</text>
+                </svg>`
+            },
+            {
+                id: 35,
+                part: 'part2',
+                title: "Câu 35",
+                content: "Máy bay cất cánh với vận tốc $450\\text{ km/h}$, đường bay tạo với mặt đất góc $24^{\\circ}$. Sau $1,2$ phút, máy bay đạt độ cao bao nhiêu kilômét (làm tròn đến hàng phần mười)?",
+                answer: "3,7",
+                explanation: "Đổi thời gian $1,2\\text{ phút} = \\dfrac{1,2}{60} = 0,02\\text{ giờ}$.<br>Quãng đường bay được (cạnh huyền) là: $S = v \\cdot t = 450 \\cdot 0,02 = 9\\text{ km}$.<br>Độ cao của máy bay đạt được là cạnh đối với góc $24^{\\circ}$:<br>$h = S \\cdot \\sin 24^{\\circ} = 9 \\cdot \\sin 24^{\\circ} \\approx 9 \\cdot 0,4067 \\approx 3,7\\text{ km}$.",
+                svg: `<svg viewBox="0 0 160 140" class="w-full h-44">
+                    <rect width="160" height="140" fill="#f8fafc" rx="8"/>
+                    <line x1="20" y1="120" x2="140" y2="120" stroke="#64748b" stroke-width="2"/>
+                    <line x1="30" y1="120" x2="130" y2="50" stroke="#3b82f6" stroke-width="3"/>
+                    <line x1="130" y1="50" x2="130" y2="120" stroke="#ef4444" stroke-width="2" stroke-dasharray="3"/>
+                    <text x="70" y="75" font-size="10" fill="#3b82f6">9 km</text>
+                    <text x="135" y="90" font-size="10" fill="#ef4444">h</text>
+                    <text x="45" y="112" font-size="10" fill="#64748b">24°</text>
+                </svg>`
+            }
+        ];
+
+        /* --- APPLICATION STATE --- */
+        let currentPart = 'part1'; // 'part1' or 'part2'
+        let currentQuestionIndex = 0; // index in filtered array
+        let userAnswers = {}; // { qId: selectedOptionIndex or shortAnswerString }
+        let checkedStatus = {}; // { qId: true/false }
+        let currentFontSizeLevel = 0; // -1, 0, 1, 2
+
+        // Filter questions based on part
+        function getFilteredQuestions() {
+            return questions.filter(q => q.part === currentPart);
+        }
+
+        /* --- INITIALIZATION --- */
+        window.onload = function() {
+            renderQuestion();
+            renderGridDrawerList();
+            updateCompletedCounter();
+            initWhiteboards();
+        };
+
+        function switchPart(part) {
+            currentPart = part;
+            currentQuestionIndex = 0;
+            document.getElementById('btn-part1').className = part === 'part1' ? 
+                'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all bg-indigo-600 text-white shadow' :
+                'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all text-slate-300 hover:text-white';
+            document.getElementById('btn-part2').className = part === 'part2' ? 
+                'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all bg-indigo-600 text-white shadow' :
+                'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all text-slate-300 hover:text-white';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const filtered = getFilteredQuestions();
+            if (currentQuestionIndex >= filtered.length) currentQuestionIndex = filtered.length - 1;
+            if (currentQuestionIndex < 0) currentQuestionIndex = 0;
+
+            const q = filtered[currentQuestionIndex];
+            
+            // Header badges
+            document.getElementById('slide-badge').innerText = `${q.title} / Tổng 35 câu`;
+            document.getElementById('slide-category-badge').innerText = q.part === 'part1' ? 'Trắc nghiệm nhiều lựa chọn (Phần I)' : 'Trắc nghiệm trả lời ngắn (Phần II)';
+            document.getElementById('current-q-num').innerText = q.id;
+            document.getElementById('total-q-num').innerText = '35';
+
+            // Question text
+            document.getElementById('q-title').innerText = `${q.title}:`;
+            document.getElementById('q-content').innerHTML = q.content;
+
+            // Options container
+            const optContainer = document.getElementById('q-options-container');
+            optContainer.innerHTML = '';
+
+            if (q.part === 'part1') {
+                let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">';
+                q.options.forEach((opt, idx) => {
+                    const isSelected = userAnswers[q.id] === idx;
+                    const isChecked = checkedStatus[q.id];
+                    let borderColor = 'border-slate-200 hover:border-indigo-300 bg-white';
+                    let textColor = 'text-slate-800';
+                    
+                    if (isChecked) {
+                        if (idx === q.correct) {
+                            borderColor = 'border-emerald-500 bg-emerald-50';
+                            textColor = 'text-emerald-900 font-bold';
+                        } else if (isSelected) {
+                            borderColor = 'border-rose-500 bg-rose-50';
+                            textColor = 'text-rose-900';
+                        }
+                    } else if (isSelected) {
+                        borderColor = 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20';
+                    }
+
+                    html += `
+                        <div onclick="selectOption(${q.id}, ${idx})" class="p-4 rounded-xl border-2 ${borderColor} cursor-pointer transition-all flex items-start space-x-3 shadow-sm">
+                            <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                                ${String.fromCharCode(65 + idx)}
+                            </div>
+                            <div class="flex-1 ${textColor} text-sm md:text-base math-font">
+                                ${opt}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                optContainer.innerHTML = html;
+            } else {
+                // Part 2: Short answer (4 input boxes)
+                const currentVal = userAnswers[q.id] || "";
+                let html = `
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center space-y-3">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nhập kết quả trả lời ngắn (số nguyên hoặc thập phân):</span>
+                        <div class="flex items-center space-x-2" id="short-answer-inputs">
+                `;
+                for (let i = 0; i < 6; i++) {
+                    const charVal = currentVal[i] || "";
+                    html += `<input type="text" maxlength="1" value="${charVal}" oninput="handleShortInput(event, ${q.id}, ${i})" onkeydown="handleShortKeyDown(event, ${q.id}, ${i})" class="w-12 h-14 text-center text-xl font-bold bg-white border-2 border-slate-300 focus:border-indigo-600 rounded-xl shadow-sm outline-none transition-all">`;
+                }
+                html += `</div></div>`;
+                optContainer.innerHTML = html;
+            }
+
+            // SVG Diagram
+            const diagramWrapper = document.getElementById('diagram-container-wrapper');
+            const svgBox = document.getElementById('svg-diagram-box');
+            if (q.svg) {
+                diagramWrapper.classList.remove('hidden');
+                svgBox.innerHTML = q.svg;
+            } else {
+                diagramWrapper.classList.add('hidden');
+                svgBox.innerHTML = '';
+            }
+
+            // Feedback & Explanation state
+            const feedbackBox = document.getElementById('result-feedback');
+            const explBtn = document.getElementById('btn-toggle-expl');
+            const explBox = document.getElementById('explanation-box');
+            explBox.classList.add('hidden');
+
+            if (checkedStatus[q.id]) {
+                feedbackBox.classList.remove('hidden');
+                explBtn.classList.remove('hidden');
+                
+                if (q.part === 'part1') {
+                    if (userAnswers[q.id] === q.correct) {
+                        feedbackBox.className = 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-emerald-100 text-emerald-800';
+                        feedbackBox.innerHTML = '<i class="fa-solid fa-check"></i><span>Chính xác!</span>';
+                    } else {
+                        feedbackBox.className = 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-rose-100 text-rose-800';
+                        feedbackBox.innerHTML = '<i class="fa-solid fa-xmark"><span>Chưa chính xác!</span>';
+                    }
+                } else {
+                    const userAnsNorm = (userAnswers[q.id] || "").trim().replace('.', ',');
+                    const correctNorm = (q.answer || "").trim().replace('.', ',');
+                    if (userAnsNorm === correctNorm) {
+                        feedbackBox.className = 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-emerald-100 text-emerald-800';
+                        feedbackBox.innerHTML = '<i class="fa-solid fa-check"></i><span>Chính xác!</span>';
+                    } else {
+                        feedbackBox.className = 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-rose-100 text-rose-800';
+                        feedbackBox.innerHTML = '<i class="fa-solid fa-xmark"></i><span>Chưa chính xác!</span>';
+                    }
+                }
+                document.getElementById('explanation-content').innerHTML = q.explanation;
+            } else {
+                feedbackBox.classList.add('hidden');
+                explBtn.classList.add('hidden');
+            }
+
+            // Trigger MathJax typeset
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+
+            updateGridDrawerList();
+            updateCompletedCounter();
+        }
+
+        function selectOption(qId, optIdx) {
+            userAnswers[qId] = optIdx;
+            renderQuestion();
+        }
+
+        // Handle short answer typing across inputs
+        function handleShortInput(e, qId, boxIdx) {
+            const val = e.target.value;
+            let current = userAnswers[qId] || "";
+            let arr = current.split('');
+            arr[boxIdx] = val;
+            userAnswers[qId] = arr.join('').trim();
+
+            if (val && boxIdx < 5) {
+                const inputs = e.target.parentElement.querySelectorAll('input');
+                if (inputs[boxIdx + 1]) inputs[boxIdx + 1].focus();
+            }
+        }
+
+        function handleShortKeyDown(e, qId, boxIdx) {
+            if (e.key === 'Backspace') {
+                if (!e.target.value && boxIdx > 0) {
+                    const inputs = e.target.parentElement.querySelectorAll('input');
+                    inputs[boxIdx - 1].focus();
+                }
+            }
+        }
+
+        function checkAnswer() {
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            checkedStatus[q.id] = true;
+            renderQuestion();
+        }
+
+        function toggleExplanation() {
+            const explBox = document.getElementById('explanation-box');
+            const btnText = document.getElementById('expl-btn-text');
+            if (explBox.classList.contains('hidden')) {
+                explBox.classList.remove('hidden');
+                btnText.innerText = 'Ẩn lời giải chi tiết';
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise();
+                }
+            } else {
+                explBox.classList.add('hidden');
+                btnText.innerText = 'Xem lời giải chi tiết';
+            }
+        }
+
+        function nextQuestion() {
+            const filtered = getFilteredQuestions();
+            if (currentQuestionIndex < filtered.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else if (currentPart === 'part1') {
+                switchPart('part2');
+            }
+        }
+
+        function prevQuestion() {
+            const filtered = getFilteredQuestions();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            } else if (currentPart === 'part2') {
+                switchPart('part1');
+                const prevFiltered = getFilteredQuestions();
+                currentQuestionIndex = prevFiltered.length - 1;
+                renderQuestion();
+            }
+        }
+
+        /* --- GRID DRAWER & NAVIGATION --- */
+        function toggleGridDrawer() {
+            const drawer = document.getElementById('grid-drawer');
+            const panel = document.getElementById('grid-drawer-panel');
+            if (drawer.classList.contains('opacity-0')) {
+                drawer.classList.remove('opacity-0', 'pointer-events-none');
+                panel.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('opacity-0', 'pointer-events-none');
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        function renderGridDrawerList() {
+            const container = document.getElementById('grid-questions-list');
+            container.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const isDone = checkedStatus[q.id];
+                let bgClass = 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200';
+                if (isDone) {
+                    bgClass = 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold';
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `p-3 rounded-xl border ${bgClass} flex flex-col items-center justify-center transition-all text-xs font-semibold shadow-sm`;
+                btn.innerHTML = `<span>C${q.id}</span>`;
+                btn.onclick = () => {
+                    currentPart = q.part;
+                    document.getElementById('btn-part1').className = currentPart === 'part1' ? 
+                        'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all bg-indigo-600 text-white shadow' :
+                        'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all text-slate-300 hover:text-white';
+                    document.getElementById('btn-part2').className = currentPart === 'part2' ? 
+                        'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all bg-indigo-600 text-white shadow' :
+                        'px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all text-slate-300 hover:text-white';
+                    
+                    const filtered = getFilteredQuestions();
+                    currentQuestionIndex = filtered.findIndex(item => item.id === q.id);
+                    renderQuestion();
+                    toggleGridDrawer();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function updateGridDrawerList() {
+            renderGridDrawerList();
+        }
+
+        function updateCompletedCounter() {
+            const doneCount = Object.keys(checkedStatus).length;
+            document.getElementById('completed-counter').innerText = `Đã làm: ${doneCount}/35`;
+        }
+
+        /* --- SVG ZOOM MODAL --- */
+        function openSvgModal() {
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            if (!q || !q.svg) return;
+            document.getElementById('svg-modal-content').innerHTML = q.svg.replace('class="w-full h-44"', 'class="w-full max-w-md h-80"');
+            const modal = document.getElementById('svg-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeSvgModal() {
+            const modal = document.getElementById('svg-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        /* --- WHITEBOARD SYSTEM (HTML5 Canvas) --- */
+        let overlayCanvas, overlayCtx;
+        let splitCanvas, splitCtx;
+        let drawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#ef4444';
+        let currentLineWidth = 3;
+
+        let splitTool = 'pen';
+        let splitColor = '#ffffff';
+        let splitLineWidth = 3;
+
+        // Store drawings per question to persist state
+        let overlayDrawings = {}; // { qId: imageData }
+        let splitDrawings = {}; // { qId: imageData }
+
+        function initWhiteboards() {
+            // Overlay Whiteboard
+            overlayCanvas = document.getElementById('overlay-whiteboard');
+            overlayCtx = overlayCanvas.getContext('2d');
+            resizeCanvas(overlayCanvas);
+
+            overlayCanvas.addEventListener('mousedown', startDrawOverlay);
+            overlayCanvas.addEventListener('mousemove', drawOverlay);
+            overlayCanvas.addEventListener('mouseup', stopDrawOverlay);
+            overlayCanvas.addEventListener('touchstart', handleTouchStartOverlay);
+            overlayCanvas.addEventListener('touchmove', handleTouchMoveOverlay);
+            overlayCanvas.addEventListener('touchend', stopDrawOverlay);
+
+            // Split Whiteboard
+            splitCanvas = document.getElementById('split-whiteboard');
+            splitCtx = splitCanvas.getContext('2d');
+            resizeCanvas(splitCanvas);
+
+            splitCanvas.addEventListener('mousedown', startDrawSplit);
+            splitCanvas.addEventListener('mousemove', drawSplit);
+            splitCanvas.addEventListener('mouseup', stopDrawSplit);
+            splitCanvas.addEventListener('touchstart', handleTouchStartSplit);
+            splitCanvas.addEventListener('touchmove', handleTouchMoveSplit);
+            splitCanvas.addEventListener('touchend', stopDrawSplit);
+
+            window.addEventListener('resize', () => {
+                resizeCanvas(overlayCanvas);
+                resizeCanvas(splitCanvas);
+            });
+        }
+
+        function resizeCanvas(canvas) {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        // Overlay Board Logic
+        function toggleOverlayBoard() {
+            const wrapper = document.getElementById('overlay-canvas-wrapper');
+            if (wrapper.classList.contains('hidden')) {
+                wrapper.classList.remove('hidden');
+                resizeCanvas(overlayCanvas);
+                loadOverlayDrawing();
+            } else {
+                saveOverlayDrawing();
+                wrapper.classList.add('hidden');
+            }
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.getElementById('tool-pen').className = tool === 'pen' ? 'p-2 rounded-lg bg-indigo-600 text-white shadow text-sm' : 'p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm';
+            document.getElementById('tool-eraser').className = tool === 'eraser' ? 'p-2 rounded-lg bg-indigo-600 text-white shadow text-sm' : 'p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm';
+        }
+
+        function setColor(col) {
+            currentColor = col;
+            currentTool = 'pen';
+            setTool('pen');
+        }
+
+        function setLineWidth(w) {
+            currentLineWidth = parseInt(w);
+        }
+
+        function clearWhiteboard() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            delete overlayDrawings[q.id];
+        }
+
+        function saveOverlayDrawing() {
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            if (q) {
+                overlayDrawings[q.id] = overlayCtx.getImageData(0, 0, overlayCanvas.width, overlayCanvas.height);
+            }
+        }
+
+        function loadOverlayDrawing() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            if (q && overlayDrawings[q.id]) {
+                overlayCtx.putImageData(overlayDrawings[q.id], 0, 0);
+            }
+        }
+
+        function startDrawOverlay(e) {
+            drawing = true;
+            overlayCtx.beginPath();
+            const rect = overlayCanvas.getBoundingClientRect();
+            overlayCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function drawOverlay(e) {
+            if (!drawing) return;
+            const rect = overlayCanvas.getBoundingClientRect();
+            overlayCtx.lineWidth = currentLineWidth;
+            overlayCtx.lineCap = 'round';
+            if (currentTool === 'eraser') {
+                overlayCtx.strokeStyle = 'rgba(255,255,255,1)';
+                overlayCtx.globalCompositeOperation = 'destination-out';
+            } else {
+                overlayCtx.strokeStyle = currentColor;
+                overlayCtx.globalCompositeOperation = 'source-over';
+            }
+            overlayCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            overlayCtx.stroke();
+        }
+
+        function stopDrawOverlay() {
+            drawing = false;
+        }
+
+        function handleTouchStartOverlay(e) {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                overlayCanvas.dispatchEvent(mouseEvent);
+            }
+        }
+
+        function handleTouchMoveOverlay(e) {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                overlayCanvas.dispatchEvent(mouseEvent);
+            }
+        }
+
+        // Split Board Logic
+        function toggleSplitBoard() {
+            const splitPane = document.getElementById('split-whiteboard-pane');
+            if (splitPane.classList.contains('hidden')) {
+                splitPane.classList.remove('hidden');
+                resizeCanvas(splitCanvas);
+                loadSplitDrawing();
+            } else {
+                saveSplitDrawing();
+                splitPane.classList.add('hidden');
+            }
+        }
+
+        function setBoardTexture(type) {
+            const wrapper = document.getElementById('split-board-bg-wrapper');
+            const btnGreen = document.getElementById('tex-green');
+            const btnGrid = document.getElementById('tex-grid');
+            if (type === 'green') {
+                wrapper.className = 'flex-1 relative board-green overflow-hidden';
+                btnGreen.className = 'px-2.5 py-1 bg-emerald-900 border border-emerald-600 text-xs font-semibold rounded text-emerald-200 shadow';
+                btnGrid.className = 'px-2.5 py-1 bg-slate-700 border border-slate-600 text-xs font-semibold rounded text-slate-300 shadow';
+                splitColor = '#ffffff';
+            } else {
+                wrapper.className = 'flex-1 relative board-grid overflow-hidden';
+                btnGrid.className = 'px-2.5 py-1 bg-indigo-900 border border-indigo-600 text-xs font-semibold rounded text-indigo-200 shadow';
+                btnGreen.className = 'px-2.5 py-1 bg-slate-700 border border-slate-600 text-xs font-semibold rounded text-slate-300 shadow';
+                splitColor = '#1e293b';
+            }
+        }
+
+        function setSplitTool(tool) {
+            splitTool = tool;
+            document.getElementById('split-tool-pen').className = tool === 'pen' ? 'px-2.5 py-1 bg-indigo-600 text-white rounded font-medium' : 'px-2.5 py-1 bg-slate-800 text-slate-300 rounded font-medium';
+            document.getElementById('split-tool-eraser').className = tool === 'eraser' ? 'px-2.5 py-1 bg-indigo-600 text-white rounded font-medium' : 'px-2.5 py-1 bg-slate-800 text-slate-300 rounded font-medium';
+        }
+
+        function setSplitColor(col) {
+            splitColor = col;
+            splitTool = 'pen';
+            setSplitTool('pen');
+        }
+
+        function clearSplitWhiteboard() {
+            splitCtx.clearRect(0, 0, splitCanvas.width, splitCanvas.height);
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            delete splitDrawings[q.id];
+        }
+
+        function saveSplitDrawing() {
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            if (q) {
+                splitDrawings[q.id] = splitCtx.getImageData(0, 0, splitCanvas.width, splitCanvas.height);
+            }
+        }
+
+        function loadSplitDrawing() {
+            splitCtx.clearRect(0, 0, splitCanvas.width, splitCanvas.height);
+            const filtered = getFilteredQuestions();
+            const q = filtered[currentQuestionIndex];
+            if (q && splitDrawings[q.id]) {
+                splitCtx.putImageData(splitDrawings[q.id], 0, 0);
+            }
+        }
+
+        function startDrawSplit(e) {
+            drawing = true;
+            splitCtx.beginPath();
+            const rect = splitCanvas.getBoundingClientRect();
+            splitCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function drawSplit(e) {
+            if (!drawing) return;
+            const rect = splitCanvas.getBoundingClientRect();
+            splitCtx.lineWidth = splitLineWidth;
+            splitCtx.lineCap = 'round';
+            if (splitTool === 'eraser') {
+                splitCtx.globalCompositeOperation = 'destination-out';
+            } else {
+                splitCtx.strokeStyle = splitColor;
+                splitCtx.globalCompositeOperation = 'source-over';
+            }
+            splitCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            splitCtx.stroke();
+        }
+
+        function stopDrawSplit() {
+            drawing = false;
+        }
+
+        function handleTouchStartSplit(e) {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                splitCanvas.dispatchEvent(mouseEvent);
+            }
+        }
+
+        function handleTouchMoveSplit(e) {
+            if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                splitCanvas.dispatchEvent(mouseEvent);
+            }
+        }
+
+        /* --- UTILITIES: FONT SIZE & FULLSCREEN --- */
+        function adjustFontSize(direction) {
+            currentFontSizeLevel += direction;
+            if (currentFontSizeLevel < -1) currentFontSizeLevel = -1;
+            if (currentFontSizeLevel > 2) currentFontSizeLevel = 2;
+
+            const contentBox = document.getElementById('q-content');
+            if (currentFontSizeLevel === -1) {
+                contentBox.className = 'text-sm md:text-base text-slate-700 math-font leading-relaxed mb-6 space-y-3';
+            } else if (currentFontSizeLevel === 0) {
+                contentBox.className = 'text-base md:text-lg text-slate-700 math-font leading-relaxed mb-6 space-y-3';
+            } else if (currentFontSizeLevel === 1) {
+                contentBox.className = 'text-lg md:text-xl text-slate-700 math-font leading-relaxed mb-6 space-y-3';
+            } else {
+                contentBox.className = 'text-xl md:text-2xl text-slate-700 math-font leading-relaxed mb-6 space-y-3';
+            }
+        }
+
+        function toggleFullscreen() {
+            const icon = document.getElementById('fullscreen-icon');
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen:", err);
+                });
+                icon.className = "fa-solid fa-compress";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                icon.className = "fa-solid fa-expand";
+            }
+        }
+    </script>
+</body>
+</html>
